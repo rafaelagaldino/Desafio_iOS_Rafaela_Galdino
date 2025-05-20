@@ -11,15 +11,15 @@ import CoreData
 
 class InsertCustomerViewController: UIViewController {
     let container = UIView()
-    let clientNameLabel = UILabel()
-    let clientNameTextField = UITextField()
-    let clientPhoneLabel = UILabel()
-    let clientPhoneTextField = UITextField()
-    let clientCpfLabel = UILabel()
-    let clientCpfTextField = UITextField()
-    let clientDateOfbirthLabel = UILabel()
-    let clientDateOfbirthTextField = UITextField()
-    let clientGenreLabel = UILabel()
+    lazy var clientNameLabel = getLabel(string: "Nome")
+    lazy var clientNameTextField = getTextField()
+    lazy var clientPhoneLabel = getLabel(string: "Telefone")
+    lazy var clientPhoneTextField = getTextField()
+    lazy var clientCpfLabel = getLabel(string: "CPF")
+    lazy var clientCpfTextField = getTextField()
+    lazy var clientDateOfbirthLabel = getLabel(string: "Data de nascimento")
+    lazy var clientDateOfbirthTextField = getTextField()
+    lazy var clientGenreLabel = getLabel(string: "Genêro")
     let clientGenreSegmentedControl = UISegmentedControl(items: ["F", "M"])
     var genre: String = ""
     var ageYears: Int = 0
@@ -70,9 +70,21 @@ class InsertCustomerViewController: UIViewController {
     }
     
     @objc func actionSave(_ sender: AnyObject) {
-        if clientNameTextField.text!.isEmpty || clientCpfTextField.text!.isEmpty || clientPhoneTextField.text!.isEmpty || clientDateOfbirthTextField.text!.isEmpty || genre.isEmpty || ageYears == 0 {
+        let fields: [String?] = [
+            clientNameTextField.text,
+            clientCpfTextField.text,
+            clientPhoneTextField.text,
+            clientDateOfbirthTextField.text,
+            genre
+        ]
+
+        let hasEmptyField = fields.contains { $0?.trimmingCharacters(in: .whitespaces).isEmpty ?? true }
+
+        if hasEmptyField || ageYears == 0 {
             showAlert()
-        } else {
+            return
+        }
+        
             if client == nil {
                 client = Client(context: context)
             }
@@ -89,7 +101,6 @@ class InsertCustomerViewController: UIViewController {
             } catch {
                 print(error.localizedDescription)
             }
-        }
     }
     
     @objc func actionCancel(_ sender: AnyObject) {
@@ -108,34 +119,29 @@ class InsertCustomerViewController: UIViewController {
     }
 
     func addLabels() {
-        clientNameLabel.text = "Nome"
-        clientNameLabel.textColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
         container.addSubview(clientNameLabel)
-        
-        clientCpfLabel.text = "CPF"
         container.addSubview(clientPhoneLabel)
-        
-        clientPhoneLabel.text = "Telefone"
         container.addSubview(clientCpfLabel)
-        
-        clientDateOfbirthLabel.text = "Data de nascimento"
         container.addSubview(clientDateOfbirthLabel)
-        
-        clientGenreLabel.text = "Gênero"
         container.addSubview(clientGenreLabel)
     }
     
+    func getLabel(string: String) -> UILabel {
+        var label = UILabel()
+        label.text = string
+        return label
+    }
+    
+    func getTextField() -> UITextField {
+        var textField = UITextField()
+        textField.borderStyle = UITextField.BorderStyle.roundedRect
+        return textField
+    }
+    
     func addTextFields() {
-        clientNameTextField.borderStyle = UITextField.BorderStyle.roundedRect
         container.addSubview(clientNameTextField)
-        
-        clientPhoneTextField.borderStyle = UITextField.BorderStyle.roundedRect
         container.addSubview(clientPhoneTextField)
-        
-        clientCpfTextField.borderStyle = UITextField.BorderStyle.roundedRect
         container.addSubview(clientCpfTextField)
-        
-        clientDateOfbirthTextField.borderStyle = UITextField.BorderStyle.roundedRect
         container.addSubview(clientDateOfbirthTextField)
     }
     
@@ -256,8 +262,7 @@ extension InsertCustomerViewController: UITextFieldDelegate {
             
             popDatePicker!.pick(self, initDate: initDate, dataChanged: dataChangedCallback)
             return false
-        }
-        else {
+        } else {
             return true
         }
     }
